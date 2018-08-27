@@ -28,7 +28,6 @@ class cssimportCommand(sublime_plugin.TextCommand):
         importFileContent = importFile.read()
         importFileUrls = [groups[0] for groups in re.findall(r'(url\((?![\'"]?(?:data|http):)[\'"]?([^\'"\)]*)[\'"]?\))', importFileContent)]
         cssPath = path.rsplit('/', 1)[0]
-
         
         for importFileUrl in importFileUrls:
           imageReplaceString = re.findall(r'\((.*)\)', importFileUrl)[0]
