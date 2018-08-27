@@ -1,6 +1,6 @@
 import sublime, sublime_plugin, os, re
 
-class importcssCommand(sublime_plugin.TextCommand):
+class cssimportCommand(sublime_plugin.TextCommand):
   def run(self, edit):
 
     # get path and name of main file
@@ -14,31 +14,28 @@ class importcssCommand(sublime_plugin.TextCommand):
 
     # create(rewrite) new minified file
     createFile = os.path.join(mainFilePath, minifiedFileName)
-    with open(createFile, 'w'):
+    with open(createFile, 'w', encoding="utf-8"):
       pass
-    sublime.active_window().open_file(minifiedFileName)
 
     # get paths from main file
-    with open (mainFileFullName, 'r') as mainFile:
+    with open (mainFileFullName, 'r', encoding="utf-8") as mainFile:
       mainFileContent = mainFile.read().replace('"', "'")
     importPaths = re.findall(r'\'(.+?)\'', mainFileContent)
 
     # search for urls, conversion and writing to a file
     for path in importPaths:
-      with open (path, 'r') as importFile:
+      with open (path, 'r', encoding="utf-8") as importFile:
         importFileContent = importFile.read()
         importFileUrls = [groups[0] for groups in re.findall(r'(url\((?![\'"]?(?:data|http):)[\'"]?([^\'"\)]*)[\'"]?\))', importFileContent)]
         cssPath = path.rsplit('/', 1)[0]
 
-        if importFileUrls:
-          for importFileUrl in importFileUrls:
-            imageReplaceString = re.findall(r'\((.*)\)', importFileUrl)[0]
-            image = imageReplaceString.replace('"', '').replace("'", '')
-            importFileContent = importFileContent.replace(imageReplaceString, '"' + cssPath + '/' + image + '"');
-            if importFileUrl == importFileUrls[-1]:
-              with open(minifiedFileName, 'a') as minifiedFile:
-                minifiedFile.write(importFileContent)
-        else:
-          with open(minifiedFileName, 'a') as minifiedFile:
-            minifiedFile.write(importFileContent)
+        
+        for importFileUrl in importFileUrls:
+          imageReplaceString = re.findall(r'\((.*)\)', importFileUrl)[0]
+          image = imageReplaceString.replace('"', '').replace("'", '')
+          importFileContent = importFileContent.replace(imageReplaceString, '"' + cssPath + '/' + image + '"');            
+        
+        with open(minifiedFileName, 'a', encoding="utf-8") as minifiedFile:
+          minifiedFile.write(importFileContent)
 
+    sublime.active_window().open_file(minifiedFileName)
